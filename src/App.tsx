@@ -1,45 +1,112 @@
+import React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppLayout } from "@/components/AppLayout";
-import Dashboard from "./pages/Dashboard";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+
+import { AuthProvider } from "./contexts/AuthContext";
+import { AppLayout } from "./components/AppLayout";
+
 import Login from "./pages/Login";
-import POS from "./pages/POS";
+
+
+import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Customers from "./pages/Customers";
 import Suppliers from "./pages/Suppliers";
+import Users from "./pages/Users";
 import Reports from "./pages/Reports";
-import SettingsPage from "./pages/Settings";
+import POS from "./pages/POS";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import UsersPage from "./pages/Users";
+import "./App.css";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppLayout>
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+
+const Home: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+};
+
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/pos" element={<POS />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/suppliers" element={<Suppliers />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/users" element={<UsersPage />} />
+            <Route path="/" element={<Home />} />
+<Route path="/login" element={<Login />} />
+
+
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/products" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Products />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/customers" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Customers />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/suppliers" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Suppliers />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/users" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Users />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Reports />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/pos" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <POS />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Settings />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AppLayout>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
+
